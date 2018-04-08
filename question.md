@@ -8,7 +8,9 @@
 1. 初始化寄存器spsr的状态
 2. 加锁，分配procs数据内容
 3. 设置寄存器 pc spsr sp和优先级 p_prio
-4. 设置通用寄存器 X0=入口地址 X1=endpoint X29=4
+    1). pc设置为函数sn_thread_std_smc_entry的入口
+    2). 
+4. 设置通用寄存器 X0=入口地址 X1=endpoint X29=0
 5. 调用函数call_resume
 
 > 加锁过程 lock_global
@@ -72,3 +74,39 @@ struct run_info {
 > X1 表示通用寄存器1，pc,spsr,sp为对应的arm芯片的寄存器  
 > proc为内核设置的进程表  
 > #1 表示栈桢第一层  
+
+
+
+---
+### 2018/04/08
+> sn_tee_ta_exec函数
+> parameter : *ta_addr 程序运行的地址
+> parameter : pn       给程序分配的proc槽号
+> return : res         见分析
+
+1. 调用 res = sn_ta_load(ta_addr, proc).
+    proc = &procs[pn]
+2. enqueue(proc)
+
+> 函数 int sn_ta_load(struct shdr *signed_ta, struct proc *proc)
+> parameter : signed_ta     程序运行的地址
+> parameter : proc          分配给这个进程的proc的槽的引用
+
+1. 调用res = sn_load_elf(proc,signed_ta)
+2. 调用sn_tee_mmu_set_ctx(proc)
+3. 设置uregs
+    1). spsr = read_daif() & (SPSR_64_DAIF_MASK << SPSR_64_DAIF_SHIFT)
+    2). usr_stack = mmu->regions[0].va) + mobj_stack->size    // proc里面信息
+    3). x29 = 0
+    4). sp = usr_stack
+    5). pc = entry
+4. 调用vfp_enable()
+5. return TEE_SUCCESS
+
+
+
+
+
+
+
+
