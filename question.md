@@ -111,6 +111,7 @@ struct run_info {
 > 函数sn_tee_mmu_set_ctx(proc)
 > parameter : proc      进程槽号
 > return    : void
+> remark    : 这部分主要是设置进程的页表（not focused now)
 
 1. sn_core_mmu_create_user_map(proc)
 2. core_mmu_set_user_map(&user_map)         // user_map 用proc-> map进行初始化
@@ -131,6 +132,38 @@ struct core_mmu_table_info {
 	unsigned shift;
 	unsigned num_entries;
 };
+```
+```c 
+ #0 sn_core_mmu_create_user_map
+ #1 sn_core_mmu_get_user_pddir
+ #2 core_mmu_get_user_va_range
+ #2 core_mmu_set_info_table
+        完成对core_mmu_table_info信息的初始化
+ #1 sn_core_mmu_populate_user_map
+        ？？ struct pgt_cache 信息unfound
+        
+ #1 virt_to_phys
+```
+```c
+reference data structure
+struct pgt {
+	void *tbl;
+#if defined(CFG_PAGED_USER_TA)
+	vaddr_t vabase;
+	struct tee_ta_ctx *ctx;
+	size_t num_used_entries;
+#endif
+#if defined(CFG_WITH_PAGER)
+#if !defined(CFG_WITH_LPAE)
+	struct pgt_parent *parent;
+#endif
+#endif
+#ifdef CFG_SMALL_PAGE_USER_TA
+	SLIST_ENTRY(pgt) link;
+#endif
+}; // used in sn_core_mmu_populate_user_map
+
+
 ```
 
 
