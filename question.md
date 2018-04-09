@@ -103,8 +103,35 @@ struct run_info {
 4. 调用vfp_enable()
 5. return TEE_SUCCESS
 
+> 函数sn_load_elf(struct proc *proc, struct shdr *shdr)
+> parameter : proc      proc槽号
+> parameter : shdr      进程运行地址
+> return    : TEE_Result    加载elf操作的结果
 
+> 函数sn_tee_mmu_set_ctx(proc)
+> parameter : proc      进程槽号
+> return    : void
 
+1. sn_core_mmu_create_user_map(proc)
+2. core_mmu_set_user_map(&user_map)         // user_map 用proc-> map进行初始化
+
+```c
+/*
+ * struct core_mmu_table_info - Properties for a translation table
+ * @table:	Pointer to translation table
+ * @va_base:	VA base address of the transaltion table
+ * @level:	Translation table level
+ * @shift:	The shift of each entry in the table
+ * @num_entries: Number of entries in this table.
+ */
+struct core_mmu_table_info {
+	void *table;
+	vaddr_t va_base;
+	unsigned level;
+	unsigned shift;
+	unsigned num_entries;
+};
+```
 
 
 
