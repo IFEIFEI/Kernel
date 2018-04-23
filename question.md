@@ -163,7 +163,52 @@ struct pgt {
 #endif
 }; // used in sn_core_mmu_populate_user_map
 
+/**
+ * TA加载映像的时候用于检测验证的数据
+ */
+struct shdr {
+	uint32_t magic;
+	uint32_t img_type;
+	uint32_t img_size;
+	uint32_t algo;
+	uint16_t hash_size;
+	uint16_t sig_size;
+};
+```
+---
 
+### 2018/04/20
+```c
+内核数据对象：以数据结构为载体
+
+//进程控制块
+struct mproc
+{
+    unint32_t mp_num;       // 进程号
+    int mp_endpoint;        // 进程 endpoint
+    int mp_father;          // 父进程号
+}
+// op on mproc
+
+//消息结构
+struct message {
+    int from;               // 发送者
+    int to;                 // 接收者
+    int type;               // 类型
+    union {
+        char msg[64];       // 消息体
+        uint64_t ts;        // 时间戳
+		int mp_pid;         // 发送的消息进程的pid
+    } u;
+};
+```
+```coq
+Inductive mess_u :=
+| MESSUUndef
+| MESSU (msg: List Char) (ts: nat) (mp_pid: Z)
+Inductive message :=
+| MESSUndef
+| MESS (from: Z) (to: Z) (type: Z)
 ```
 
 
